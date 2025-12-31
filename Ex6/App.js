@@ -8,7 +8,6 @@ export default function App() {
   const [isValid, setIsValid] = useState(null);
 
   const validatePhoneNumber = () => {
-    // Remove any spaces, dashes, or country code prefix
     let cleanedNumber = phoneNumber.replace(/[\s-]/g, '');
     
     // Remove +91 or 91 prefix if present
@@ -42,7 +41,7 @@ export default function App() {
     // Check if first digit is 6, 7, 8, or 9
     const firstDigit = cleanedNumber[0];
     if (!['6', '7', '8', '9'].includes(firstDigit)) {
-      setValidationMessage('Indian mobile numbers must start with 6, 7, 8, or 9');
+      setValidationMessage('Mobile numbers must start with 6, 7, 8, or 9');
       setIsValid(false);
       return;
     }
