@@ -17,12 +17,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { width } = Dimensions.get('window');
 
 // 1. FIXED DIMENSIONS: This is the secret to making it scroll.
-// If these are percentages, the ScrollView collapses.
+// If these are percentages, zthe ScrollView collapses.
 const GRAPH_HEIGHT = 250; 
 const BAR_WIDTH = 40;
 const BAR_MARGIN = 10;
 
-const Bar = ({ value, maxValue, index }) => {
+const Bar = ({ value, label, maxValue }) => {
   const animatedHeight = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -53,25 +53,49 @@ const Bar = ({ value, maxValue, index }) => {
           />
         </Animated.View>
       </View>
-      <Text style={styles.axisLabel}>{index}</Text>
+      <Text style={styles.axisLabel} numberOfLines={1} ellipsizeMode="tail">{label}</Text>
     </View>
   );
 };
 
 export default function App() {
-  const [inputText, setInputText] = useState('10, 25, 15, 40, 30, 10, 50, 20, 45, 15');
-  const [data, setData] = useState([10, 25, 15, 40, 30, 10, 50, 20, 45, 15]);
+  const [inputText, setInputText] = useState('Walking:29, Cycling:15, Car:35, Bus:18, Train:3');
+  const [data, setData] = useState([
+    { label: 'Walking', value: 29 },
+    { label: 'Cycling', value: 15 },
+    { label: 'Car', value: 35 },
+    { label: 'Bus', value: 18 },
+    { label: 'Train', value: 3 },
+  ]);
   const [isFocused, setIsFocused] = useState(false);
 
   const handleGenerate = () => {
     Keyboard.dismiss();
-    const nums = inputText.split(',')
-      .map(part => parseInt(part.trim(), 10))
-      .filter(num => !isNaN(num));
-    setData(nums);
+    const parts = inputText.split(',');
+    
+    const newData = parts.map((part, index) => {
+      // Check for "Label:Value" format
+      if (part.includes(':')) {
+        const [labelStr, valStr] = part.split(':');
+        const num = parseInt(valStr.trim(), 10);
+        return {
+          label: labelStr.trim(),
+          value: isNaN(num) ? 0 : num
+        };
+      } else {
+        // Fallback for just numbers
+        const num = parseInt(part.trim(), 10);
+        return {
+          label: `Result ${index + 1}`,
+          value: isNaN(num) ? 0 : num
+        };
+      }
+    });
+
+    setData(newData);
   };
 
-  const maxValue = data.length > 0 ? Math.max(...data) : 1;
+  const maxValue = data.length > 0 ? Math.max(...data.map(d => d.value)) : 1;
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -85,7 +109,7 @@ export default function App() {
             style={[styles.input, isFocused && styles.inputFocused]}
             value={inputText}
             onChangeText={setInputText}
-            placeholder="Enter numbers..."
+            placeholder="e.g. Walk:10, Run:20"
             placeholderTextColor="#666"
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
@@ -104,12 +128,12 @@ export default function App() {
             showsHorizontalScrollIndicator={true}
             contentContainerStyle={styles.scrollContent}
           >
-            {data.map((value, index) => (
+            {data.map((item, index) => (
               <Bar 
-                key={`${index}-${value}`} 
-                value={value} 
+                key={`${index}-${item.label}`} 
+                value={item.value} 
+                label={item.label}
                 maxValue={maxValue} 
-                index={index} 
               />
             ))}
           </ScrollView>

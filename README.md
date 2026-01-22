@@ -79,6 +79,14 @@ This repository contains various mobile application exercises.
   - Generates a scrollable animated bar chart representing the data.
   - Dynamically updates the graph based on user input.
 
+### Ex11: File System Login
+- **Directory**: [Ex11](./Ex11)
+- **Description**: A login application demonstrating file system operations using `react-native-fs`.
+- **Features**:
+  - **File Initialization**: Automatically creates a local file (`user_data.txt`) with dummy credentials (e.g., `admin/1234`) on startup if it doesn't exist.
+  - **Authentication**: Reads from the local file system to validate entered username and password against stored records.
+  - **User Interface**: Simple login screen with inputs for credentials and status alerts.
+
 ## How to Run
 
 To run any of the applications, navigate to the project directory and run the following commands:
