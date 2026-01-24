@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Contacts from 'expo-contacts';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 
 export default function App() {
@@ -182,7 +182,7 @@ export default function App() {
 
       // Write to file
       await FileSystem.writeAsStringAsync(fileUri, fileContent, {
-        encoding: FileSystem.EncodingType.UTF8,
+        encoding: 'utf8',
       });
 
       // Share the file
@@ -291,10 +291,30 @@ export default function App() {
         )}
 
         {contacts.length > 0 && (
-          <View style={styles.previewBox}>
-            <Text style={styles.previewTitle}>Preview (First Contact):</Text>
-            <Text style={styles.previewText}>
-              {formatContactData(contacts[0]).substring(0, 300)}...
+          <View style={styles.previewSection}>
+            <Text style={styles.previewTitle}>Preview (First {Math.min(contacts.length, 5)} Contacts):</Text>
+            {contacts.slice(0, 5).map((contact, index) => (
+              <View key={index} style={styles.contactCard}>
+                <View style={styles.contactIcon}>
+                  <Text style={styles.contactIconText}>
+                    {contact.name ? contact.name.charAt(0).toUpperCase() : '?'}
+                  </Text>
+                </View>
+                <View style={styles.contactInfo}>
+                  <Text style={styles.contactName}>{contact.name || 'Unknown Name'}</Text>
+                  {contact.phoneNumbers && contact.phoneNumbers.length > 0 ? (
+                    <Text style={styles.contactDetail}>📞 {contact.phoneNumbers[0].number}</Text>
+                  ) : (
+                    <Text style={styles.contactDetail}>📞 No phone number</Text>
+                  )}
+                  {contact.emails && contact.emails.length > 0 && (
+                    <Text style={styles.contactDetail}>✉️ {contact.emails[0].email}</Text>
+                  )}
+                </View>
+              </View>
+            ))}
+            <Text style={styles.moreText}>
+              ...and {contacts.length - Math.min(contacts.length, 5)} more contacts
             </Text>
           </View>
         )}
@@ -409,23 +429,61 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
-  previewBox: {
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 15,
-    borderWidth: 1,
-    borderColor: '#ddd',
+  previewSection: {
+    marginTop: 20,
+    marginBottom: 40,
   },
   previewTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 15,
     color: '#333',
   },
-  previewText: {
-    fontSize: 12,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  contactCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  contactIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  contactIconText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  contactInfo: {
+    flex: 1,
+  },
+  contactName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  contactDetail: {
+    fontSize: 14,
     color: '#666',
+    marginBottom: 2,
+  },
+  moreText: {
+    textAlign: 'center',
+    color: '#999',
+    marginTop: 10,
+    fontStyle: 'italic',
   },
 });
