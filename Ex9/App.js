@@ -22,6 +22,8 @@ export default function App() {
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [showToolPicker, setShowToolPicker] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showSizePicker, setShowSizePicker] = useState(false);
+  const [penSize, setPenSize] = useState(4);
   const [hue, setHue] = useState(0);
   const [saturation, setSaturation] = useState(100);
   const [lightness, setLightness] = useState(50);
@@ -77,6 +79,7 @@ export default function App() {
     if (selectedTool === 'free') {
       const newStroke = {
         color: selectedColor,
+        size: penSize,
         points: [{ x: locationX, y: locationY }],
       };
       setCurrentStroke(newStroke);
@@ -169,7 +172,7 @@ export default function App() {
         key={index}
         d={path}
         stroke={stroke.color}
-        strokeWidth="4"
+        strokeWidth={stroke.size || 4}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -280,6 +283,18 @@ export default function App() {
             <Text style={styles.dropdownArrow}>▼</Text>
           </TouchableOpacity>
 
+          {/* Size Selector (only show for free draw) */}
+          {selectedTool === 'free' && (
+            <TouchableOpacity
+              style={styles.dropdownButton}
+              onPress={() => setShowSizePicker(true)}
+            >
+              <Text style={styles.dropdownIcon}>📝</Text>
+              <Text style={styles.dropdownText}>Size: {penSize}</Text>
+              <Text style={styles.dropdownArrow}>▼</Text>
+            </TouchableOpacity>
+          )}
+
           {/* Clear Button */}
           <TouchableOpacity
             style={styles.clearButton}
@@ -339,6 +354,106 @@ export default function App() {
                 )}
               </TouchableOpacity>
             ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Size Picker Modal */}
+      <Modal
+        visible={showSizePicker}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowSizePicker(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowSizePicker(false)}
+        >
+          <View style={styles.sizePickerContainer}>
+            <Text style={styles.pickerTitle}>Pen Size</Text>
+            
+            {/* Size Preview */}
+            <View style={styles.sizePreviewContainer}>
+              <Svg width={150} height={100}>
+                <Path
+                  d="M 20 50 L 130 50"
+                  stroke={selectedColor}
+                  strokeWidth={penSize}
+                  strokeLinecap="round"
+                />
+              </Svg>
+              <Text style={styles.sizeValueText}>{penSize}px</Text>
+            </View>
+
+            {/* Size Slider */}
+            <View style={styles.sizeSliderContainer}>
+              <Text style={styles.sliderLabel}>Adjust Size</Text>
+              <View
+                style={styles.sizeSlider}
+                onStartShouldSetResponder={() => true}
+                onResponderGrant={(e) => {
+                  const { locationX } = e.nativeEvent;
+                  const newSize = Math.max(1, Math.min(50, Math.round((locationX / 250) * 50)));
+                  setPenSize(newSize);
+                }}
+                onResponderMove={(e) => {
+                  const { locationX } = e.nativeEvent;
+                  const newSize = Math.max(1, Math.min(50, Math.round((locationX / 250) * 50)));
+                  setPenSize(newSize);
+                }}
+              >
+                <Svg width={250} height={40}>
+                  {/* Slider track */}
+                  <Path
+                    d="M 0 20 L 250 20"
+                    stroke="#ccc"
+                    strokeWidth="2"
+                  />
+                  {/* Slider fill */}
+                  <Path
+                    d={`M 0 20 L ${(penSize / 50) * 250} 20`}
+                    stroke="#2196F3"
+                    strokeWidth="3"
+                  />
+                  {/* Slider thumb */}
+                  <Path
+                    d={`M ${(penSize / 50) * 250 - 10} 5 L ${(penSize / 50) * 250 + 10} 5 L ${(penSize / 50) * 250 + 10} 35 L ${(penSize / 50) * 250 - 10} 35 Z`}
+                    fill="#2196F3"
+                  />
+                </Svg>
+              </View>
+            </View>
+
+            {/* Quick Sizes */}
+            <View style={styles.quickSizesContainer}>
+              <Text style={styles.sliderLabel}>Quick Sizes</Text>
+              <View style={styles.quickSizesRow}>
+                {[1, 4, 8, 15, 25, 40].map((size) => (
+                  <TouchableOpacity
+                    key={size}
+                    style={[
+                      styles.sizeButton,
+                      penSize === size && styles.sizeButtonSelected,
+                    ]}
+                    onPress={() => setPenSize(size)}
+                  >
+                    <Text style={[
+                      styles.sizeButtonText,
+                      penSize === size && styles.sizeButtonSelected_Text
+                    ]}>{size}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Done Button */}
+            <TouchableOpacity
+              style={styles.doneButton}
+              onPress={() => setShowSizePicker(false)}
+            >
+              <Text style={styles.doneButtonText}>Done</Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -742,5 +857,71 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  sizePickerContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    width: width * 0.85,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  sizePreviewContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    paddingVertical: 15,
+  },
+  sizeValueText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 8,
+  },
+  sizeSliderContainer: {
+    marginBottom: 20,
+  },
+  sizeSlider: {
+    width: 250,
+    height: 40,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#ccc',
+    alignSelf: 'center',
+  },
+  quickSizesContainer: {
+    marginBottom: 20,
+  },
+  quickSizesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+  },
+  sizeButton: {
+    flexBasis: '15%',
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+    borderWidth: 2,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  sizeButtonSelected: {
+    backgroundColor: '#2196F3',
+    borderColor: '#1976D2',
+  },
+  sizeButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  sizeButtonSelected_Text: {
+    color: '#ffffff',
   },
 });
