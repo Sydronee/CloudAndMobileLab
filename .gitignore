@@ -79,3 +79,5 @@ ios/Pods/
 # Temporary files
 *.log
 *.lock
+
+android/
