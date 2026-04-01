@@ -1,0 +1,71 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  padding: 10px;
+  /* Add safe area inset padding for mobile notches */
+  padding-top: env(safe-area-inset-top, 10px);
+  padding-bottom: env(safe-area-inset-bottom, 10px);
+}
+
+h1 {
+  font-size: 1.5rem;
+  text-align: center;
+  margin: 10px 0 20px 0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.input-group {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+}
+
+.input-group input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex: 1;
+  min-width: 0; /* allows shrinking below implicitly minimum sizes */
+  font-size: 14px;
+}
+
+.input-group button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.input-group button:active {
+  background-color: #0056b3;
+}
+
+.btn-location {
+  background-color: #28a745 !important;
+}
+
+.btn-location:active {
+  background-color: #218838 !important;
+}
+
+.map-container {
+  flex: 1; /* Automatically fill remaining vertical space */
+  width: 100%;
+  margin-top: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  min-height: 200px;
+}
